@@ -11,6 +11,19 @@ if (!isset($_SESSION['user_id'])) {
 $user_name = $_SESSION['user_name'];
 $user_role = $_SESSION['user_role'];
 $is_approved = $_SESSION['is_approved'];
+$hospitalName = $_SESSION['hospitalName'];
+
+/* //データベース接続
+include("db_config.php");
+
+//病院名に基づいてマニュアル情報をデータベースから取得
+$sql = "SELECT * FROM manual_table WHERE hospital_table = :hospitalName";
+$stmt = $pdo->prepare($sql);
+$stmt->bindParam(':hospitalName', $hospitalName, PDO::PARAM_STR);
+$stmt->execute();
+
+//マニュアル情報を取得
+$manual = $stmt->fetch(PDO::FETCH_ASSOC); */
 
 ?>
 
@@ -48,6 +61,14 @@ $is_approved = $_SESSION['is_approved'];
     <!-- user_role 2の場合、管理者リンク -->
     <?php if ($user_role == 2): ?>
         <p><a href="admin.php">管理者ページ</a></p>
+    <?php endif; ?>
+
+<!-- 病院ごとのマニュアル表示 -->
+    <?php if ($manual): ?>
+        <h2><?php echo htmlspecialchars($hospital_name, ENT_QUOTES, 'UTF-8'); ?>のマニュアル</h2>
+        <p><?php echo htmlspecialchars($manual['manual'], ENT_QUOTES, 'UTF-8'); ?></p>
+    <?php else: ?>
+        <p>この病院のマニュアルはまだありません。</p>
     <?php endif; ?>
 
 <?php else: ?>

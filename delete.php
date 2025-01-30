@@ -22,7 +22,7 @@ $id = $_GET['id'];
 include("db_config.php");
 
 // SQLでメンバー情報を削除
-$sql = "DELETE FROM auth_table WHERE memberId = :memberId";
+$sql = "DELETE FROM users_table WHERE memberId = :memberId";
 $stmt = $pdo->prepare($sql);
 $stmt->bindValue(':memberId', $id, PDO::PARAM_INT);
 

@@ -19,14 +19,14 @@ if (isset($_POST['action']) && isset($_POST['user_id'])) {
     try {
         if ($action == 'approve') {
             // 承認
-            $sql = "UPDATE auth_table SET is_approved = 1 WHERE memberId = :user_id";
+            $sql = "UPDATE users_table SET is_approved = 1 WHERE memberId = :user_id";
             $stmt = $pdo->prepare($sql);
             $stmt->bindParam(':user_id', $user_id);
             $stmt->execute();
             echo "ユーザーの承認が完了しました。";
         } elseif ($action == 'reject') {
             // 拒否（未承認にし、拒否理由を保存）
-            $sql = "UPDATE auth_table SET is_approved = 0, rejection_reason = :rejection_reason WHERE memberId = :user_id";
+            $sql = "UPDATE users_table SET is_approved = 0, rejection_reason = :rejection_reason WHERE memberId = :user_id";
             $stmt = $pdo->prepare($sql);
             $stmt->bindParam(':user_id', $user_id);
             $stmt->bindParam(':rejection_reason', $rejection_reason);

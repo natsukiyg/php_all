@@ -1,7 +1,6 @@
 <?php
-
 // DB接続設定
-include("db_config.php"); // DB接続設定ファイル
+include("db_config.php");
 
 session_start();
 
@@ -15,7 +14,7 @@ if (!isset($_SESSION['user_id'])) {
 $id = $_SESSION['user_id'];
 
 // SQLでメンバー情報を取得
-$sql = "SELECT * FROM auth_table WHERE memberId = :id";
+$sql = "SELECT * FROM users_table WHERE memberId = :id";
 $stmt = $pdo->prepare($sql);
 $stmt->bindValue(':id', $id, PDO::PARAM_INT);
 $stmt->execute();
@@ -25,6 +24,15 @@ $member = $stmt->fetch(PDO::FETCH_ASSOC);
 if (!$member) {
     exit("該当するメンバーが見つかりません。");
 }
+
+// hospitalIdを使ってhospitalNameを取得
+$hospitalId = $member['hospitalId'];
+$sql_hospital = "SELECT hospitalName FROM hospital_table WHERE hospitalId = :hospitalId";
+$stmt_hospital = $pdo->prepare($sql_hospital);
+$stmt_hospital->bindValue(':hospitalId', $hospitalId, PDO::PARAM_INT);
+$stmt_hospital->execute();
+$hospital = $stmt_hospital->fetch(PDO::FETCH_ASSOC);
+$hospitalName = $hospital ? $hospital['hospitalName'] : ''; // hospitalNameが見つからない場合は空にする
 
 // 権限の表示用配列
 $user_roles = [
@@ -42,7 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $email = $_POST['email'];
     $password = $_POST['password'];
     $address = $_POST['address'];
-    $facility = $_POST['facility'];
+    $hospitalName = $_POST['hospitalName'];
     $user_role = $_POST['user_role'];
 
     // バリデーション：メールアドレスの形式チェック
@@ -52,23 +60,40 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     // パスワードが空でない場合のみ、更新処理を行う
     if (!empty($_POST['password'])) {
-        $password = $_POST['password'];  // 新しいパスワードを取得
-        // パスワードをハッシュ化する場合、ここで処理する
-        $password = password_hash($password, PASSWORD_DEFAULT);  // パスワードをハッシュ化（必要なら）
+        $password = password_hash($password, PASSWORD_DEFAULT);  // パスワードをハッシュ化
     } else {
         // パスワードが送信されていない場合、元のパスワードを保持
         $password = $member['password'];  // 元のパスワードを使う
     }
 
+    // hospitalNameを基にhospitalIdを取得
+    $sql_hospital_check = "SELECT hospitalId FROM hospital_table WHERE hospitalName = :hospitalName";
+    $stmt_hospital_check = $pdo->prepare($sql_hospital_check);
+    $stmt_hospital_check->bindValue(':hospitalName', $hospitalName, PDO::PARAM_STR);
+    $stmt_hospital_check->execute();
+    $hospital_data = $stmt_hospital_check->fetch(PDO::FETCH_ASSOC);
+
+    if ($hospital_data) {
+        // 既存の病院がある場合
+        $hospitalId = $hospital_data['hospitalId'];
+    } else {
+        // 新規病院を登録
+        $sql_insert_hospital = "INSERT INTO hospital_table (hospitalName) VALUES (:hospitalName)";
+        $stmt_insert_hospital = $pdo->prepare($sql_insert_hospital);
+        $stmt_insert_hospital->bindValue(':hospitalName', $hospitalName, PDO::PARAM_STR);
+        $stmt_insert_hospital->execute();
+
+        // 新規に追加した病院のIDを取得
+        $hospitalId = $pdo->lastInsertId();
+    }
+
     //タイムゾーン設定
     date_default_timezone_set('Asia/Tokyo');
-
-    //現在の日時を取得（更新日時として使用）
     $updated_at = date('Y-m-d H:i:s');
 
     // SQLを実行してデータを更新
-    $sql = "UPDATE auth_table SET name = :name, gender = :gender, birthday = :birthday, 
-            email = :email, password = :password, address = :address, facility = :facility, 
+    $sql = "UPDATE users_table SET name = :name, gender = :gender, birthday = :birthday, 
+            email = :email, password = :password, address = :address, hospitalId = :hospitalId, 
             user_role = :user_role, updated_at = :updated_at WHERE memberId = :id";
     $stmt = $pdo->prepare($sql);
 
@@ -79,14 +104,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $stmt->bindValue(':email', $email, PDO::PARAM_STR);
     $stmt->bindValue(':password', $password, PDO::PARAM_STR);
     $stmt->bindValue(':address', $address, PDO::PARAM_STR);
-    $stmt->bindValue(':facility', $facility, PDO::PARAM_STR);
+    $stmt->bindValue(':hospitalId', $hospitalId, PDO::PARAM_INT);
     $stmt->bindValue(':user_role', $user_role, PDO::PARAM_INT);
     $stmt->bindValue(':updated_at', $updated_at, PDO::PARAM_STR);
     $stmt->bindValue(':id', $id, PDO::PARAM_INT);
 
     try {
         $stmt->execute();
-        // 更新成功したら、ポップアップを表示し、一定時間後にユーザーダッシュボードへ遷移
         echo '<script type="text/javascript">
                 alert("更新が完了しました！");
                 setTimeout(function() {
@@ -99,8 +123,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         exit;
     }
 }
-
 ?>
+
 
 <!-- 編集フォーム -->
 <!DOCTYPE html>
@@ -187,8 +211,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         <option value="沖縄県" <?php echo $member['address'] == '沖縄県' ? 'selected' : ''; ?>>沖縄県</option>
     </select><br>
 
-    <label for="facility">所属施設:</label>
-    <input type="text" id="facility" name="facility" value="<?php echo htmlspecialchars($member['facility']); ?>" required><br>
+    <label for="hospitalName">所属施設:</label>
+    <input type="text" id="hospitalName" name="hospitalName" value="<?php echo htmlspecialchars($hospitalName); ?>" required><br>
 
     <label for="user_role">権限:</label>
     <select id="user_role" name="user_role" required>

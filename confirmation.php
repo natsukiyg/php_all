@@ -5,7 +5,7 @@ session_start();
 
 //セッションからデータを取得
 if (!isset($_SESSION['member_data'])) {
-    exit("データがありません");
+    exit("不正なアクセスです。データがありません");
 }
 
 //$member_data = $_SESSION['member_data'];
@@ -17,7 +17,7 @@ $gender = $member_data['gender'];
 $birthday = $member_data['birthday'];
 $email = $member_data['email'];
 $address = $member_data['address'];
-$facility = $member_data['facility'];
+$hospitalName = $member_data['hospitalName'];
 $user_role = $member_data['user_role'];
 $whereDidYouHear = $member_data['whereDidYouHear'];
 $expectations = $member_data['expectations'];
@@ -75,9 +75,9 @@ switch ($user_role) {
         <tr><th>性別</th><td><?= htmlspecialchars($gender) ?></td></tr>
         <tr><th>誕生日</th><td><?= htmlspecialchars($birthday) ?></td></tr>
         <tr><th>メールアドレス</th><td><?= htmlspecialchars($email) ?></td></tr>
-        <tr><th>パスワード</th><td>【表示されません】</td></tr> <!-- できればパスワードの文字数だけ反映させたい -->
+        <tr><th>パスワード</th><td><?= str_repeat('●', strlen($member_data['password'])) ?></td></tr>
         <tr><th>住所</th><td><?= htmlspecialchars($address) ?></td></tr>
-        <tr><th>所属施設</th><td><?= htmlspecialchars($facility) ?></td></tr>
+        <tr><th>所属施設</th><td><?= htmlspecialchars($hospitalName) ?></td></tr>
         <tr><th>権限</th><td><?= htmlspecialchars($role_name) ?></td></tr> <!-- 権限の名前を表示 -->
         <tr><th>知ったきっかけ</th><td><?= htmlspecialchars($whereDidYouHear) ?></td></tr>
         <tr><th>期待する機能</th><td><?= htmlspecialchars($expectations) ?></td></tr>

@@ -4,7 +4,7 @@
 include("db_config.php");
 
 // 削除されたデータを取得（deleted_at が NULL でない）
-$sql = 'SELECT * FROM auth_table WHERE deleted_at IS NOT NULL';
+$sql = 'SELECT * FROM users_table WHERE deleted_at IS NOT NULL';
 $stmt = $pdo->prepare($sql);
 
 // SQL実行（実行に失敗すると `sql error ...` が出力される）
@@ -23,7 +23,7 @@ if (isset($_POST['restore'])) {
     $id = $_POST['id'];
 
     // 復元操作: deleted_atをNULLにリセット
-    $sql = "UPDATE auth_table SET deleted_at = NULL WHERE memberId = :id";
+    $sql = "UPDATE users_table SET deleted_at = NULL WHERE memberId = :id";
     $stmt = $pdo->prepare($sql);
     $stmt->bindValue(':id', $id, PDO::PARAM_INT);
 
@@ -52,7 +52,7 @@ foreach ($result as $record) {
         <td>{$record["birthday"]}</td>
         <td>{$record["email"]}</td>
         <td>{$record["address"]}</td>
-        <td>{$record["facility"]}</td>
+        <td>{$record["hospitalId"]}</td>
         <td>{$record["whereDidYouHear"]}</td>
         <td>{$record["expectations"]}</td>
         <td>{$record["registered_at"]}</td>
@@ -110,7 +110,7 @@ foreach ($result as $record) {
                 <td><?= htmlspecialchars($record["birthday"]) ?></td>
                 <td><?= htmlspecialchars($record["email"]) ?></td>
                 <td><?= htmlspecialchars($record["address"]) ?></td>
-                <td><?= htmlspecialchars($record["facility"]) ?></td>
+                <td><?= htmlspecialchars($record["hospitalId"]) ?></td>
                 <td><?= htmlspecialchars($record["whereDidYouHear"]) ?></td>
                 <td><?= htmlspecialchars($record["expectations"]) ?></td>
                 <td><?= htmlspecialchars($record["deleted_at"]) ?></td>

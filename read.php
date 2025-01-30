@@ -13,7 +13,7 @@ if (isset($_POST['delete'])) {
     $id = $_POST['id'];
 
     // 削除操作: deleted_atに現在の日時をセット
-    $sql = "UPDATE auth_table SET deleted_at = NOW() WHERE memberId = :id";
+    $sql = "UPDATE users_table SET deleted_at = NOW() WHERE memberId = :id";
     $stmt = $pdo->prepare($sql);
     $stmt->bindValue(':id', $id, PDO::PARAM_INT);
 
@@ -30,7 +30,7 @@ if (isset($_POST['delete'])) {
 }
 
 // SQL作成
-$sql = 'SELECT * FROM auth_table WHERE deleted_at IS NULL'; // deleted_at が NULL のものだけ取得
+$sql = 'SELECT * FROM users_table WHERE deleted_at IS NULL'; // deleted_at が NULL のものだけ取得
 $stmt = $pdo->prepare($sql);
 
 //SQL実行
@@ -72,7 +72,7 @@ foreach ($result as $record) {
         <td>{$record["birthday"]}</td>
         <td>{$record["email"]}</td>
         <td>{$record["address"]}</td>
-        <td>{$record["facility"]}</td>
+        <td>{$record["hospitalId"]}</td>
         <td>" . getUserRole($record["user_role"]) . "</td> <!-- 権限を変換 -->
         <td>{$approvalStatus} {$rejectionReason}</td> <!-- 承認状態と拒否理由 -->
         <td>{$record["whereDidYouHear"]}</td>

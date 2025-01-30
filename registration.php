@@ -89,8 +89,8 @@ include("db_config.php"); // db_config.phpの中身を読み込むので、$dbn�
                 <option value="沖縄県">沖縄県</option>
             </select><br>
 
-            <label for="facility">所属施設：</label>
-            <input type="text" id="facility" name="facility" required><br>
+            <label for="hospitalName">所属施設：</label>
+            <input type="text" id="hospitalName" name="hospitalName" required><br>
 
             <!-- ユーザー権限 -->
             <label for="user_role">権限：</label><br>

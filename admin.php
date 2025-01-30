@@ -18,7 +18,7 @@ if ($_SESSION['user_role'] != 2) {
 
 // 承認待ちユーザーを取得
 try {
-    $sql = "SELECT memberId, name, email, user_role FROM auth_table WHERE is_approved = 0";
+    $sql = "SELECT memberId, name, email, user_role FROM users_table WHERE is_approved = 0";
     $stmt = $pdo->prepare($sql);
     $stmt->execute();
     $users = $stmt->fetchAll();
